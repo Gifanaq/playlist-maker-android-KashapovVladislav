@@ -1,6 +1,5 @@
 package com.example.myapplication
 
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -23,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
+import androidx.navigation.compose.rememberNavController
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,14 +32,18 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MaterialTheme {
-                PlaylistMakerScreen()
+                val navController = rememberNavController()
+                PlaylistHost(navController = navController)
             }
         }
     }
 }
 
 @Composable
-fun PlaylistMakerScreen() {
+fun MainScreen(
+    onSearchClick: () -> Unit,
+    onSettingsClick: () -> Unit
+) {
     val context = LocalContext.current
     val menuItems = listOf(
         MenuItem("Поиск", R.drawable.ic_search),
@@ -56,20 +60,21 @@ fun PlaylistMakerScreen() {
         modifier = Modifier
             .fillMaxSize()
             .background(blueColor)
+            .statusBarsPadding()
     ) {
         Text(
             text = "Playlist maker",
             color = whiteColor,
             fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.W500,
             modifier = Modifier
                 .align(Alignment.TopStart)
-                .padding(top = 24.dp, start = 16.dp)
+                .padding(top = 10.dp, start = 12.dp)
         )
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(730.dp)
+                .height(700.dp)
                 .align(Alignment.BottomStart),
             color = whiteColor,
             shape = RoundedCornerShape(
@@ -97,10 +102,7 @@ fun PlaylistMakerScreen() {
                             color = whiteColor,
                             onClick = {
                                 when (item.title) {
-                                    "Поиск" -> {
-                                        val intent = Intent(context, SearchActivity::class.java)
-                                        context.startActivity(intent)
-                                    }
+                                    "Поиск" -> onSearchClick()
                                     "Плейлисты" -> {
                                         Toast.makeText(
                                             context,
@@ -115,10 +117,7 @@ fun PlaylistMakerScreen() {
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     }
-                                    "Настройки" -> {
-                                        val intent = Intent(context, SettingsActivity::class.java)
-                                        context.startActivity(intent)
-                                    }
+                                    "Настройки" -> onSettingsClick()
                                 }
                             }
                         ) {
@@ -144,7 +143,7 @@ fun PlaylistMakerScreen() {
                                     text = item.title,
                                     style = TextStyle(
                                         fontSize = 22.sp,
-                                        fontWeight = FontWeight.Medium,
+                                        fontWeight = FontWeight.W500,
                                         color = textColor,
                                         lineHeight = 22.sp
                                     ),
@@ -175,6 +174,9 @@ data class MenuItem(
 @Composable
 fun PreviewPlaylistMakerScreen() {
     MaterialTheme {
-        PlaylistMakerScreen()
+        MainScreen(
+            onSearchClick = {},
+            onSettingsClick = {}
+        )
     }
 }
