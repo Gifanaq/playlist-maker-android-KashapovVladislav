@@ -1,4 +1,4 @@
-package com.example.myapplication
+package com.example.myapplication.ui.activity
 
 import android.os.Bundle
 import android.widget.Toast
@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
+import com.example.myapplication.ui.PlaylistHost
+import com.example.myapplication.R
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

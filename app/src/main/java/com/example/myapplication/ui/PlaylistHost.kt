@@ -1,9 +1,13 @@
-package com.example.myapplication
+package com.example.myapplication.ui
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.myapplication.ui.Screens
+import com.example.myapplication.ui.activity.MainScreen
+import com.example.myapplication.ui.activity.SearchScreen
+import com.example.myapplication.ui.activity.SettingsScreen
 
 @Composable
 fun PlaylistHost(navController: NavHostController) {
