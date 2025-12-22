@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <style name="Theme.MyApplication" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- Base application theme. -->
+    <style name="Theme.PlaylistMaker" parent="android:Theme.Material.Light.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="android:colorPrimary">@color/white</item>
+        <item name="android:colorAccent">@color/primary_blue</item>
+        <item name="android:textColorTertiary">@color/text_primary</item>
+    </style>
 </resources>

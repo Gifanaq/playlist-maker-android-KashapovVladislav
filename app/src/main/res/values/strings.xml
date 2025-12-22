@@ -1,18 +1,37 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Main Screen -->
     <string name="app_name">Playlist Maker</string>
-
+    <string name="playlist_maker">Playlist maker</string>
+    <string name="search">Поиск</string>
+    <string name="playlists">Плейлисты</string>
+    <string name="favorites">Избранное</string>
     <string name="settings">Настройки</string>
+
+    <!-- Toast Messages -->
+    <string name="playlists_toast">Нажата кнопка "Плейлисты"</string>
+    <string name="favorites_toast">Нажата кнопка "Избранное"</string>
+
+    <!-- Search Screen -->
+    <string name="search_hint">Поиск</string>
+    <string name="back">Назад</string>
+    <string name="clear">Очистить</string>
+    <string name="search_initial_message">Введите запрос для поиска треков</string>
+    <string name="searching">Ищем треки</string>
+    <string name="no_results">Ничего не найдено</string>
+    <string name="search_error">Ошибка поиска</string>
+    <string name="retry">Повторить</string>
+
+    <!-- Settings Screen -->
     <string name="dark_theme">Темная тема</string>
     <string name="share_app">Поделиться приложением</string>
-    <string name="support">Написать в поддержку</string>
+    <string name="support">Поддержка</string>
     <string name="terms_of_use">Пользовательское соглашение</string>
+    <string name="contact_support">Написать в поддержку</string>
 
+    <!-- Share and Support -->
+    <string name="share_text">Скачайте Playlist Maker - лучшее приложение для создания плейлистов!</string>
     <string name="support_email">vak149@tpu.ru</string>
     <string name="support_subject">Сообщение разработчикам и разработчицам приложения Playlist Maker</string>
-    <string name="support_body">Спасибо разработчикам и разработчицам за крутое приложение</string>
-
+    <string name="support_body">Спасибо разработчику за крутое приложение!</string>
     <string name="terms_url">https://yandex.ru/legal/practicum_offer/ru/</string>
-
-    <string name="share_text">Посмотрите приложение для создания плейлистов - Playlist Maker!</string>
 </resources>
