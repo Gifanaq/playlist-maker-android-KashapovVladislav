@@ -1,7 +1,7 @@
 package com.example.myapplication.ui.screens
 
 import android.content.Intent
-import android.net.Uri
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,6 +20,7 @@ import com.example.myapplication.R
 import com.example.myapplication.ui.common.SettingsScreenResources
 import com.example.myapplication.ui.components.CustomSwitch
 import com.example.myapplication.ui.common.rememberSettingsScreenResources
+import androidx.core.net.toUri
 
 
 @Composable
@@ -120,7 +121,7 @@ private fun SettingsList(
             iconRes = R.drawable.ic_support,
             onClick = {
                 val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
-                    data = Uri.parse("mailto:")
+                    data = "mailto:".toUri()
                     putExtra(Intent.EXTRA_EMAIL, arrayOf(resources.supportEmail))
                     putExtra(Intent.EXTRA_SUBJECT, resources.supportSubject)
                     putExtra(Intent.EXTRA_TEXT, resources.supportBody)
@@ -153,7 +154,7 @@ private fun SettingsList(
             title = resources.termsString,
             iconRes = R.drawable.ic_arrow,
             onClick = {
-                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(resources.termsUrl))
+                val browserIntent = Intent(Intent.ACTION_VIEW, resources.termsUrl.toUri())
                 context.startActivity(browserIntent)
             }
         )

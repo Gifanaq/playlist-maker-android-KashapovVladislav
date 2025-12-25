@@ -4,8 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.myapplication.ui.activity.MainScreen
-import  com.example.myapplication.ui.screens.SearchScreen
+import com.example.myapplication.ui.screens.FavoritesScreen
+import com.example.myapplication.ui.screens.MainScreen
+import com.example.myapplication.ui.screens.PlaylistsScreen
+import com.example.myapplication.ui.screens.SearchScreen
 import com.example.myapplication.ui.screens.SettingsScreen
 
 
@@ -19,6 +21,14 @@ fun PlaylistHost(navController: NavHostController) {
         navController.navigate(Screens.Settings.name)
     }
 
+    fun navigateToFavorites() {
+        navController.navigate(Screens.Favorites.name)
+    }
+
+    fun navigateToPlaylists() {
+        navController.navigate(Screens.Playlists.name)
+    }
+
     fun navigateBack() {
         navController.popBackStack()
     }
@@ -30,7 +40,9 @@ fun PlaylistHost(navController: NavHostController) {
         composable(Screens.Main.name) {
             MainScreen(
                 onSearchClick = { navigateToSearch() },
-                onSettingsClick = { navigateToSettings() }
+                onSettingsClick = { navigateToSettings() },
+                onFavoritesClick = { navigateToFavorites() },
+                onPlaylistsClick = { navigateToPlaylists() }
             )
         }
         composable(Screens.Songs.name) {
@@ -40,6 +52,16 @@ fun PlaylistHost(navController: NavHostController) {
         }
         composable(Screens.Settings.name) {
             SettingsScreen(
+                onBackClick = { navigateBack() }
+            )
+        }
+        composable(Screens.Favorites.name) {
+            FavoritesScreen(
+                onBackClick = { navigateBack() }
+            )
+        }
+        composable(Screens.Playlists.name) {
+            PlaylistsScreen(
                 onBackClick = { navigateBack() }
             )
         }

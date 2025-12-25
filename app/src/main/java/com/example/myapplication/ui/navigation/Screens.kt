@@ -3,5 +3,7 @@ package com.example.myapplication.ui.navigation
 enum class Screens {
     Main,
     Songs,
-    Settings
+    Settings,
+    Favorites,
+    Playlists
 }

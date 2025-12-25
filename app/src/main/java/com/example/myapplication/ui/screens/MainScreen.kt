@@ -1,6 +1,5 @@
 package com.example.myapplication.ui.screens
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,7 +9,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -19,12 +17,17 @@ import com.example.myapplication.ui.common.MainScreenResources
 import com.example.myapplication.ui.common.rememberMainScreenResources
 
 
+
+
 @Composable
 fun MainScreen(
     onSearchClick: () -> Unit,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    onPlaylistsClick: () -> Unit,
+    onFavoritesClick: () -> Unit
+
 ) {
-    val context = LocalContext.current
+
     val resources = rememberMainScreenResources()
 
     val menuItems = listOf(
@@ -83,20 +86,8 @@ fun MainScreen(
                                 onItemClick = {
                                     when (item.title) {
                                         resources.searchString -> onSearchClick()
-                                        resources.playlistsString -> {
-                                            Toast.makeText(
-                                                context,
-                                                resources.playlistsToast,
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
-                                        resources.favoritesString -> {
-                                            Toast.makeText(
-                                                context,
-                                                resources.favoritesToast,
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
+                                        resources.playlistsString -> onPlaylistsClick()
+                                        resources.favoritesString -> onFavoritesClick()
                                         resources.settingsString -> onSettingsClick()
                                     }
                                 }
@@ -169,7 +160,9 @@ fun PreviewPlaylistMakerScreen() {
     MaterialTheme {
         MainScreen(
             onSearchClick = {},
-            onSettingsClick = {}
+            onSettingsClick = {},
+            onFavoritesClick = {},
+            onPlaylistsClick = {}
         )
     }
 }
