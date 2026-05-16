@@ -1,15 +1,12 @@
 package com.example.myapplication.ui.view_model
 
-
-import com.example.myapplication.creator.Storage
-import com.example.myapplication.data.newtwork.RetrofitNetworkClient
-import com.example.myapplication.data.newtwork.TracksRepositoryImpl
+import com.example.myapplication.data.network.TracksRepositoryImpl
 import com.example.myapplication.domain.TracksRepository
-
-
+import kotlinx.coroutines.CoroutineScope
 
 object Creator {
-    fun getTracksRepository(): TracksRepository {
-        return TracksRepositoryImpl(RetrofitNetworkClient(Storage()))
+
+    fun getTracksRepository(scope: CoroutineScope): TracksRepository {
+        return TracksRepositoryImpl(scope)
     }
 }

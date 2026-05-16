@@ -1,82 +1,82 @@
 package com.example.myapplication.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.myapplication.R
-import com.example.myapplication.ui.common.rememberSettingsScreenResources
+import com.example.myapplication.data.network.Playlist
+import com.example.myapplication.ui.view_model.PlaylistsViewModel
 
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlaylistsScreen(
-    onBackClick: () -> Unit = {}
+    playlistsViewModel: PlaylistsViewModel,
+    onBackClick: () -> Unit,
+    onAddNewPlaylistClick: () -> Unit
 ) {
-    val resources = rememberSettingsScreenResources()
-    
-    // Управление состоянием видимости BottomSheet
-    var showBottomSheet by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState()
+    val playlists by playlistsViewModel.playlists.collectAsState(initial = emptyList())
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(resources.white)
+            .background(Color.White)
             .statusBarsPadding()
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(
-                        top = resources.bottomSheetPaddingTop,
-                        start = resources.bottomSheetPaddingHorizontal,
-                        end = resources.bottomSheetPaddingHorizontal
-                    ),
+                    .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(
-                    onClick = onBackClick,
-                    modifier = Modifier.size(48.dp)
-                ) {
+                IconButton(onClick = onBackClick) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_back_arrow),
-                        contentDescription = "Back",
-                        tint = resources.black,
-                        modifier = Modifier.size(resources.iconSizeMedium)
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Назад"
                     )
                 }
-
-                Spacer(modifier = Modifier.weight(0.02f))
-
                 Text(
                     text = "Плейлисты",
-                    color = resources.black,
-                    fontSize = resources.searchTitleFontSize,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.weight(1f)
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 16.dp)
                 )
             }
 
-            Box(
-                modifier = Modifier.weight(1f).fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Плейлисты отсутствуют",
-                    color = resources.gray
-                )
+            if (playlists.isEmpty()) {
+                Box(
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "Плейлисты отсутствуют", color = Color.Gray)
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(playlists) { playlist ->
+                        PlaylistListItem(playlist = playlist) {
+                            // Логика клика
+                        }
+                        HorizontalDivider(thickness = 0.5.dp, color = Color.LightGray)
+                    }
+                }
             }
         }
 
@@ -84,48 +84,43 @@ fun PlaylistsScreen(
             modifier = Modifier
                 .padding(32.dp)
                 .align(Alignment.BottomEnd),
-            onClick = { showBottomSheet = true },
-            containerColor = resources.gray,
-            contentColor = resources.white,
+            onClick = onAddNewPlaylistClick,
+            containerColor = Color.Gray,
+            contentColor = Color.White,
             shape = CircleShape
         ) {
-            Icon(
-                imageVector = Icons.Filled.Add,
-                contentDescription = "Добавить"
-            )
-        }
-
-        if (showBottomSheet) {
-            ModalBottomSheet(
-                onDismissRequest = { showBottomSheet = false },
-                sheetState = sheetState,
-                containerColor = resources.white
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 64.dp, top = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Это панель BottomSheet",
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        color = resources.black,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
+            Icon(imageVector = Icons.Filled.Add, contentDescription = "Добавить плейлист")
         }
     }
 }
 
-@Preview(showBackground = true, widthDp = 360, heightDp = 800)
 @Composable
-fun PreviewPlaylistsScreen() {
-    MaterialTheme {
-        PlaylistsScreen(
-            onBackClick = {}
+fun PlaylistListItem(playlist: Playlist, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_music),
+            contentDescription = null,
+            modifier = Modifier.size(48.dp),
+            tint = Color.Gray
         )
+        Column(modifier = Modifier.padding(start = 16.dp)) {
+            Text(
+                text = playlist.name,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black
+            )
+            Text(
+                text = "${playlist.tracks.size} треков",
+                fontSize = 12.sp,
+                color = Color.Gray
+            )
+        }
     }
 }

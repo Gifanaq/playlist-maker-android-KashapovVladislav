@@ -1,4 +1,4 @@
-package com.example.myapplication.data.newtwork
+package com.example.myapplication.data.network
 
 
 import com.example.myapplication.creator.Storage

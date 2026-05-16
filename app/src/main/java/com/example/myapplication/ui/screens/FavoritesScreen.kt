@@ -2,81 +2,67 @@ package com.example.myapplication.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.R
-import  com.example.myapplication.ui.common.rememberSettingsScreenResources
-
+import androidx.compose.ui.unit.sp
+import com.example.myapplication.ui.components.TrackListItem
+import com.example.myapplication.ui.view_model.PlaylistsViewModel
 
 @Composable
 fun FavoritesScreen(
-    onBackClick: () -> Unit = {}
+    playlistsViewModel: PlaylistsViewModel,
+    onBackClick: () -> Unit
 ) {
-    val resources = rememberSettingsScreenResources()
+    val favoriteTracks by playlistsViewModel.favoriteList.collectAsState(initial = emptyList())
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(resources.white)
+            .background(Color.White)
             .statusBarsPadding()
     ) {
+        // Заголовок
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(
-                    top = resources.bottomSheetPaddingTop,
-                    start = resources.bottomSheetPaddingHorizontal,
-                    end = resources.bottomSheetPaddingHorizontal
-                ),
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(
-                onClick = onBackClick,
-                modifier = Modifier.size(48.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_back_arrow),
-                    contentDescription = "Back",
-                    tint = resources.black,
-                    modifier = Modifier.size(resources.iconSizeMedium)
-                )
+            IconButton(onClick = onBackClick) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
             }
-
-            Spacer(modifier = Modifier.weight(0.02f))
-
             Text(
-                text = "Избранное",
-                color = resources.black,
-                fontSize = resources.searchTitleFontSize,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.weight(1f)
+                text = "Избранные треки",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = 16.dp)
             )
         }
 
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Избранное",
-                color = resources.gray
-            )
+        if (favoriteTracks.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(text = "Ваш список избранного пуст", color = Color.Gray)
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(favoriteTracks) { track ->
+                    TrackListItem(track = track)
+                    HorizontalDivider(thickness = 0.5.dp, color = Color.LightGray)
+                }
+            }
         }
-    }
-}
-
-@Preview(showBackground = true, widthDp = 360, heightDp = 800)
-@Composable
-fun PreviewFavoritesScreen() {
-    MaterialTheme {
-        FavoritesScreen(
-            onBackClick = {}
-        )
     }
 }

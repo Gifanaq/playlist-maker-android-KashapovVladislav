@@ -1,33 +1,17 @@
 package com.example.myapplication.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.myapplication.ui.screens.FavoritesScreen
-import com.example.myapplication.ui.screens.MainScreen
-import com.example.myapplication.ui.screens.PlaylistsScreen
-import com.example.myapplication.ui.screens.SearchScreen
-import com.example.myapplication.ui.screens.SettingsScreen
-
+import com.example.myapplication.ui.screens.*
+import com.example.myapplication.ui.view_model.PlaylistsViewModel
 
 @Composable
 fun PlaylistHost(navController: NavHostController) {
-    fun navigateToSearch() {
-        navController.navigate(Screens.Songs.name)
-    }
-
-    fun navigateToSettings() {
-        navController.navigate(Screens.Settings.name)
-    }
-
-    fun navigateToFavorites() {
-        navController.navigate(Screens.Favorites.name)
-    }
-
-    fun navigateToPlaylists() {
-        navController.navigate(Screens.Playlists.name)
-    }
+    // Единая ViewModel для синхронизации данных между всеми экранами
+    val playlistsViewModel: PlaylistsViewModel = viewModel()
 
     fun navigateBack() {
         navController.popBackStack()
@@ -39,29 +23,50 @@ fun PlaylistHost(navController: NavHostController) {
     ) {
         composable(Screens.Main.name) {
             MainScreen(
-                onSearchClick = { navigateToSearch() },
-                onSettingsClick = { navigateToSettings() },
-                onFavoritesClick = { navigateToFavorites() },
-                onPlaylistsClick = { navigateToPlaylists() }
+                onSearchClick = { navController.navigate(Screens.Songs.name) },
+                onSettingsClick = { navController.navigate(Screens.Settings.name) },
+                onFavoritesClick = { navController.navigate(Screens.Favorites.name) },
+                onPlaylistsClick = { navController.navigate(Screens.Playlists.name) }
             )
         }
+
         composable(Screens.Songs.name) {
             SearchScreen(
-                onBackClick = { navigateBack() }
+                playlistsViewModel = playlistsViewModel, // Передаем ViewModel для сохранения выбранного трека
+                onBackClick = { navigateBack() },
+                onTrackClick = { navController.navigate(Screens.TrackDetails.name) }
             )
         }
+
         composable(Screens.Settings.name) {
-            SettingsScreen(
-                onBackClick = { navigateBack() }
-            )
+            SettingsScreen(onBackClick = { navigateBack() })
         }
+
         composable(Screens.Favorites.name) {
             FavoritesScreen(
+                playlistsViewModel = playlistsViewModel,
                 onBackClick = { navigateBack() }
             )
         }
+
         composable(Screens.Playlists.name) {
             PlaylistsScreen(
+                playlistsViewModel = playlistsViewModel,
+                onBackClick = { navigateBack() },
+                onAddNewPlaylistClick = { navController.navigate(Screens.CreatePlaylist.name) }
+            )
+        }
+
+        composable(Screens.CreatePlaylist.name) {
+            CreatePlaylistScreen(
+                playlistsViewModel = playlistsViewModel,
+                onBackClick = { navigateBack() }
+            )
+        }
+
+        composable(Screens.TrackDetails.name) {
+            TrackDetailsScreen(
+                playlistsViewModel = playlistsViewModel,
                 onBackClick = { navigateBack() }
             )
         }

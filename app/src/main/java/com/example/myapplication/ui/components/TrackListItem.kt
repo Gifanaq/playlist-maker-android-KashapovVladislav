@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import com.example.myapplication.R
-import com.example.myapplication.data.newtwork.Track
+import com.example.myapplication.data.network.Track
 
 
 @Composable

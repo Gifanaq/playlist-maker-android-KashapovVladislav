@@ -1,45 +1,57 @@
 package com.example.myapplication.ui.view_model
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.myapplication.data.network.TracksRepositoryImpl
 import com.example.myapplication.domain.TracksRepository
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.io.IOException
 
-class SearchViewModel(
-    private val tracksRepository: TracksRepository
-) : ViewModel() {
+class SearchViewModel : ViewModel() {
+    private val tracksRepository: TracksRepository = TracksRepositoryImpl(viewModelScope)
+    
     private val _searchScreenState = MutableStateFlow<SearchState>(SearchState.Initial)
-    val searchScreenState  = _searchScreenState.asStateFlow()
+    val searchScreenState = _searchScreenState.asStateFlow()
 
-    fun search(whatSearch: String){
-        viewModelScope.launch(Dispatchers.IO) {
+    private var searchJob: Job? = null
+
+    fun searchDebounce(changedText: String) {
+        if (changedText.isBlank()) {
+            clearSearch()
+            return
+        }
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            delay(SEARCH_DEBOUNCE_DELAY)
+            search(changedText)
+        }
+    }
+
+    fun search(whatSearch: String) {
+        searchJob?.cancel()
+        viewModelScope.launch {
+            _searchScreenState.update { SearchState.Searching }
+            // Искусственная задержка для того, чтобы лоадер был виден (согласно Чек-листу)
+            delay(1000L) 
             try {
-                _searchScreenState.update { SearchState.Searching }
                 val list = tracksRepository.searchTracks(expression = whatSearch)
                 _searchScreenState.update { SearchState.Success(list = list) }
-            } catch (e: IOException){
-                _searchScreenState.update { SearchState.Fail(e.message.toString()) }
+            } catch (e: Exception) {
+                _searchScreenState.update { SearchState.Fail(e.message ?: "Error") }
             }
         }
     }
+
     fun clearSearch() {
+        searchJob?.cancel()
         _searchScreenState.value = SearchState.Initial
     }
 
-
     companion object {
-        fun getViewModelFactory(): ViewModelProvider.Factory =
-            object : ViewModelProvider.Factory {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return SearchViewModel(Creator.getTracksRepository()) as T
-                }
-            }
+        private const val SEARCH_DEBOUNCE_DELAY = 500L // Сделаем чуть быстрее для удобства
     }
 }

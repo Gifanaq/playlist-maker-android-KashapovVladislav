@@ -1,6 +1,7 @@
 package com.example.myapplication.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,7 +13,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,23 +21,26 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.R
+import com.example.myapplication.data.network.Track
 import com.example.myapplication.ui.common.SearchScreenResources
 import com.example.myapplication.ui.common.rememberSearchScreenResources
 import com.example.myapplication.ui.components.TrackListItem
+import com.example.myapplication.ui.view_model.PlaylistsViewModel
 import com.example.myapplication.ui.view_model.SearchState
 import com.example.myapplication.ui.view_model.SearchViewModel
 
 
 @Composable
 fun SearchScreen(
-    onBackClick: () -> Unit = {}
+    playlistsViewModel: PlaylistsViewModel,
+    onBackClick: () -> Unit = {},
+    onTrackClick: () -> Unit = {}
 ) {
-
-    val viewModel: SearchViewModel = viewModel(factory = SearchViewModel.getViewModelFactory())
+    val viewModel: SearchViewModel = viewModel()
     val screenState by viewModel.searchScreenState.collectAsState()
     var searchText by remember { mutableStateOf("") }
 
@@ -49,45 +52,34 @@ fun SearchScreen(
             .background(resources.white)
             .statusBarsPadding()
     ) {
+        // Шапка
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(
-                    top = resources.bottomSheetPaddingTop,
-                    start = resources.bottomSheetPaddingHorizontal,
-                    end = resources.bottomSheetPaddingHorizontal
-                ),
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(
-                onClick = onBackClick,
-                modifier = Modifier.size(48.dp)
-            ) {
+            IconButton(onClick = onBackClick) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_back_arrow),
                     contentDescription = resources.backString,
-                    tint = resources.black,
-                    modifier = Modifier.size(resources.iconSizeMedium)
+                    tint = resources.black
                 )
             }
-
-            Spacer(modifier = Modifier.weight(0.02f))
-
             Text(
                 text = resources.searchString,
                 color = resources.black,
                 fontSize = resources.searchTitleFontSize,
                 fontWeight = FontWeight.Medium,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.padding(start = 16.dp)
             )
         }
 
-        Spacer(modifier = Modifier.weight(0.02f))
-
+        // Поле ввода
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = resources.bottomSheetPaddingHorizontal)
+                .padding(horizontal = 16.dp)
                 .height(resources.searchBarHeight)
                 .background(
                     color = resources.searchBackground,
@@ -96,92 +88,41 @@ fun SearchScreen(
             contentAlignment = Alignment.CenterStart
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = resources.searchBarPaddingHorizontal),
+                modifier = Modifier.padding(horizontal = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = resources.searchHint,
-                    tint = resources.gray,
-                    modifier = Modifier.size(resources.iconSizeSmall)
-                )
-
-                Spacer(modifier = Modifier.weight(0.02f))
-
+                Icon(Icons.Default.Search, contentDescription = null, tint = resources.gray)
                 BasicTextField(
                     value = searchText,
-                    onValueChange = { newText ->
-                        searchText = newText
-                        if (newText.isEmpty()) {
-                            viewModel.clearSearch()
-                        }
+                    onValueChange = { 
+                        searchText = it
+                        if (it.isEmpty()) viewModel.clearSearch() else viewModel.searchDebounce(it)
                     },
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    textStyle = TextStyle(
-                        fontSize = resources.searchTextFontSize,
-                        color = resources.black
-                    ),
-                    decorationBox = { innerTextField ->
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.CenterStart
-                        ) {
-                            if (searchText.isEmpty()) {
-                                Text(
-                                    text = resources.searchHint,
-                                    fontSize = resources.searchHintFontSize,
-                                    color = resources.gray
-                                )
-                            }
-                            innerTextField()
-                        }
-                    },
+                    modifier = Modifier.weight(1f).padding(start = 8.dp),
+                    textStyle = TextStyle(fontSize = resources.searchTextFontSize, color = resources.black),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    keyboardActions = KeyboardActions(
-                        onSearch = {
-                            if (searchText.isNotBlank()) {
-                                viewModel.search(searchText)
-                            }
-                        }
-                    )
+                    keyboardActions = KeyboardActions(onSearch = { viewModel.search(searchText) })
                 )
-
                 if (searchText.isNotEmpty()) {
-                    IconButton(
-                        onClick = {
-                            searchText = ""
-                            viewModel.clearSearch()
-                        },
-                        modifier = Modifier.size(resources.iconSizeSmall)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Clear,
-                            contentDescription = resources.clearString,
-                            tint = resources.gray,
-                            modifier = Modifier.size(18.dp)
-                        )
+                    IconButton(onClick = { searchText = ""; viewModel.clearSearch() }) {
+                        Icon(Icons.Default.Clear, contentDescription = null, tint = resources.gray)
                     }
                 }
             }
         }
 
-        Spacer(modifier = Modifier.weight(0.04f))
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = resources.bottomSheetPaddingHorizontal)
-        ) {
+        // Контентная область
+        Box(modifier = Modifier.fillMaxSize()) {
             SearchContent(
                 screenState = screenState,
                 searchText = searchText,
                 resources = resources,
-                onRetry = { if (searchText.isNotBlank()) viewModel.search(searchText) }
+                onTrackClick = { track ->
+                    playlistsViewModel.setSelectedTrack(track)
+                    onTrackClick()
+                },
+                onRetry = { viewModel.search(searchText) }
             )
         }
     }
@@ -192,114 +133,67 @@ private fun SearchContent(
     screenState: SearchState,
     searchText: String,
     resources: SearchScreenResources,
+    onTrackClick: (Track) -> Unit,
     onRetry: () -> Unit
 ) {
+    // Состояние "Пустой ввод"
     if (searchText.isEmpty()) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.TopCenter
-        ) {
-            Text(
-                text = resources.searchInitialMessage,
-                color = resources.gray,
-                modifier = Modifier.padding(top = 80.dp)
-            )
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(text = resources.searchInitialMessage, color = resources.gray, textAlign = TextAlign.Center)
         }
-    } else {
-        when (screenState) {
-            is SearchState.Initial -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.TopCenter
-                ) {
+        return
+    }
+
+    when (screenState) {
+        // Состояние "Поиск идет" (Лоадер)
+        is SearchState.Searching -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(44.dp),
+                    color = Color.Blue,
+                    strokeWidth = 4.dp
+                )
+            }
+        }
+        
+        // Состояние "Успех" (Список или Пусто)
+        is SearchState.Success -> {
+            if (screenState.list.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = resources.searchInitialMessage,
-                        color = resources.gray,
-                        modifier = Modifier.padding(top = 80.dp)
+                        text = resources.noResultsString, 
+                        color = resources.gray, 
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(16.dp)
                     )
                 }
-            }
-
-            is SearchState.Searching -> {
-                Box(
+            } else {
+                LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        CircularProgressIndicator()
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(text = resources.searchingString)
-                    }
-                }
-            }
-
-            is SearchState.Success -> {
-                val tracks = screenState.list
-                if (tracks.isEmpty()) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.TopCenter
-                    ) {
-                        Text(
-                            text = resources.noResultsString,
-                            color = resources.gray,
-                            modifier = Modifier.padding(top = 80.dp)
-                        )
-                    }
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(1.dp)
-                    ) {
-                        items(tracks) { track ->
+                    items(screenState.list) { track ->
+                        Box(modifier = Modifier.clickable { onTrackClick(track) }) {
                             TrackListItem(track = track)
-                            HorizontalDivider(
-                                thickness = 0.5.dp,
-                                color = resources.divider
-                            )
                         }
-                    }
-                }
-            }
-
-            is SearchState.Fail -> {
-                val error = screenState.error
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.TopCenter
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = resources.searchErrorString,
-                            color = Color.Red,
-                            modifier = Modifier.padding(top = 80.dp)
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = error,
-                            color = resources.gray
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = onRetry) {
-                            Text(text = resources.retryString)
-                        }
+                        HorizontalDivider(thickness = 0.5.dp, color = resources.divider)
                     }
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true, widthDp = 360, heightDp = 800)
-@Composable
-fun PreviewSearchScreen() {
-    MaterialTheme {
-        SearchScreen(
-            onBackClick = {}
-        )
+        
+        // Состояние "Ошибка"
+        is SearchState.Fail -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(16.dp)) {
+                    Text(text = resources.searchErrorString, color = Color.Red, textAlign = TextAlign.Center)
+                    Button(onClick = onRetry, modifier = Modifier.padding(top = 16.dp)) {
+                        Text(resources.retryString)
+                    }
+                }
+            }
+        }
+        else -> {}
     }
 }
