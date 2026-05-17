@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,12 +18,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.R
 import com.example.myapplication.data.network.Track
@@ -43,6 +46,7 @@ fun SearchScreen(
     val viewModel: SearchViewModel = viewModel()
     val screenState by viewModel.searchScreenState.collectAsState()
     var searchText by remember { mutableStateOf("") }
+    val focusManager = LocalFocusManager.current
 
     val resources = rememberSearchScreenResources()
 
@@ -102,10 +106,17 @@ fun SearchScreen(
                     textStyle = TextStyle(fontSize = resources.searchTextFontSize, color = resources.black),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    keyboardActions = KeyboardActions(onSearch = { viewModel.search(searchText) })
+                    keyboardActions = KeyboardActions(onSearch = { 
+                        viewModel.search(searchText)
+                        focusManager.clearFocus()
+                    })
                 )
                 if (searchText.isNotEmpty()) {
-                    IconButton(onClick = { searchText = ""; viewModel.clearSearch() }) {
+                    IconButton(onClick = { 
+                        searchText = ""
+                        viewModel.clearSearch()
+                        focusManager.clearFocus()
+                    }) {
                         Icon(Icons.Default.Clear, contentDescription = null, tint = resources.gray)
                     }
                 }
@@ -136,7 +147,6 @@ private fun SearchContent(
     onTrackClick: (Track) -> Unit,
     onRetry: () -> Unit
 ) {
-    // Состояние "Пустой ввод"
     if (searchText.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(text = resources.searchInitialMessage, color = resources.gray, textAlign = TextAlign.Center)
@@ -145,27 +155,31 @@ private fun SearchContent(
     }
 
     when (screenState) {
-        // Состояние "Поиск идет" (Лоадер)
         is SearchState.Searching -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(44.dp),
-                    color = Color.Blue,
-                    strokeWidth = 4.dp
-                )
+                CircularProgressIndicator(color = Color.Blue)
             }
         }
         
-        // Состояние "Успех" (Список или Пусто)
         is SearchState.Success -> {
             if (screenState.list.isEmpty()) {
+                // Плейсхолдер "Ничего не найдено"
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = resources.noResultsString, 
-                        color = resources.gray, 
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(16.dp)
-                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_not_found),
+                            contentDescription = null,
+                            modifier = Modifier.size(120.dp)
+                        )
+                        Text(
+                            text = "Ничего не нашлось",
+                            modifier = Modifier.padding(top = 16.dp),
+                            color = Color.Black,
+                            fontSize = 19.sp,
+                            fontWeight = FontWeight.Medium,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             } else {
                 LazyColumn(
@@ -183,13 +197,40 @@ private fun SearchContent(
             }
         }
         
-        // Состояние "Ошибка"
         is SearchState.Fail -> {
+            // Плейсхолдер "Проблемы со связью" строго по макету
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(16.dp)) {
-                    Text(text = resources.searchErrorString, color = Color.Red, textAlign = TextAlign.Center)
-                    Button(onClick = onRetry, modifier = Modifier.padding(top = 16.dp)) {
-                        Text(resources.retryString)
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(horizontal = 24.dp)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_network_error),
+                        contentDescription = null,
+                        modifier = Modifier.size(120.dp)
+                    )
+                    Text(
+                        text = "Проблемы со связью",
+                        color = Color.Black,
+                        fontSize = 19.sp,
+                        fontWeight = FontWeight.Medium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(top = 16.dp)
+                    )
+                    Text(
+                        text = "Загрузка не удалась. Проверьте подключение к интернету",
+                        color = Color.Black,
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                    Button(
+                        onClick = onRetry,
+                        modifier = Modifier.padding(top = 24.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
+                        shape = RoundedCornerShape(54.dp)
+                    ) {
+                        Text(text = "Обновить", color = Color.White, modifier = Modifier.padding(horizontal = 4.dp))
                     }
                 }
             }

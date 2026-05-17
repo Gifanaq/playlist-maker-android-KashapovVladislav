@@ -26,7 +26,8 @@ import com.example.myapplication.ui.view_model.PlaylistsViewModel
 fun PlaylistsScreen(
     playlistsViewModel: PlaylistsViewModel,
     onBackClick: () -> Unit,
-    onAddNewPlaylistClick: () -> Unit
+    onAddNewPlaylistClick: () -> Unit,
+    onPlaylistClick: (Long) -> Unit // Новый параметр для навигации
 ) {
     val playlists by playlistsViewModel.playlists.collectAsState(initial = emptyList())
 
@@ -72,7 +73,7 @@ fun PlaylistsScreen(
                 ) {
                     items(playlists) { playlist ->
                         PlaylistListItem(playlist = playlist) {
-                            // Логика клика
+                            onPlaylistClick(playlist.id) // Передаем ID для перехода
                         }
                         HorizontalDivider(thickness = 0.5.dp, color = Color.LightGray)
                     }

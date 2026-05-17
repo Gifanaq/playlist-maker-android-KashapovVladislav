@@ -18,7 +18,6 @@ class DatabaseMock(
             Track(id = 4, trackName = "Звезда по имени Солнце", artistName = "Кино", trackTime = "3:45")
         )
         
-        // Поток событий для автоматического обновления UI при любых изменениях в базе
         private val _updateTrigger = MutableSharedFlow<Unit>(replay = 1).apply { tryEmit(Unit) }
     }
 
@@ -36,14 +35,17 @@ class DatabaseMock(
 
     // --- Работа с плейлистами ---
     fun getAllPlaylists(): Flow<List<Playlist>> = _updateTrigger.map {
-        delay(500) // Имитация задержки базы
+        delay(300)
         playlists.map { playlist ->
             playlist.copy(tracks = tracks.filter { it.playlistId == playlist.id })
         }
     }
 
+    // ИСПРАВЛЕНО: Теперь возвращаем плейлист С ТРЕКАМИ, чтобы на экране деталей не было "0 треков"
     fun getPlaylist(id: Long): Flow<Playlist?> = _updateTrigger.map {
-        playlists.find { it.id == id }
+        playlists.find { it.id == id }?.let { playlist ->
+            playlist.copy(tracks = tracks.filter { it.playlistId == playlist.id })
+        }
     }
 
     fun addNewPlaylist(name: String, description: String) {

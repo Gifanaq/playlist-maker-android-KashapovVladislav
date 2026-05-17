@@ -1,43 +1,86 @@
 package com.example.myapplication.ui.components
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.myapplication.R
 import com.example.myapplication.data.network.Track
-
 
 @Composable
 fun TrackListItem(track: Track) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_music),
-            contentDescription = "Трек ${track.trackName}"
+        // Обложка трека с Coil
+        AsyncImage(
+            model = track.artworkUrl100,
+            placeholder = painterResource(id = R.drawable.ic_music),
+            error = painterResource(id = R.drawable.ic_music),
+            contentDescription = null,
+            modifier = Modifier
+                .size(45.dp)
+                .clip(RoundedCornerShape(2.dp)),
+            contentScale = ContentScale.Crop
         )
+
         Column(
-            modifier = Modifier.weight(1f),
-            horizontalAlignment = Alignment.Start
+            modifier = Modifier
+                .padding(start = 12.dp)
+                .weight(1f)
         ) {
-            Text(track.trackName, fontWeight = FontWeight.Bold)
-            Text(track.artistName)
+            Text(
+                text = track.trackName,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Normal,
+                color = Color.Black,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = track.artistName,
+                    fontSize = 11.sp,
+                    color = Color.Gray,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false)
+                )
+                Text(
+                    text = " • ",
+                    fontSize = 11.sp,
+                    color = Color.Gray
+                )
+                Text(
+                    text = track.trackTime,
+                    fontSize = 11.sp,
+                    color = Color.Gray
+                )
+            }
         }
-        Column(
-            modifier = Modifier.weight(1f),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(track.trackTime)
-        }
+
+        Icon(
+            painter = painterResource(id = R.drawable.ic_arrow),
+            contentDescription = null,
+            modifier = Modifier
+                .padding(start = 8.dp)
+                .size(16.dp),
+            tint = Color.LightGray
+        )
     }
 }
