@@ -11,7 +11,6 @@ class PlaylistViewModel(
     private val playlistId: Long
 ) : ViewModel() {
 
-    // Репозиторий создается здесь, где доступен viewModelScope
     private val playlistsRepository: PlaylistsRepository = Creator.getPlaylistsRepository(viewModelScope)
 
     val playlist: Flow<Playlist?> = playlistsRepository.getPlaylist(playlistId)

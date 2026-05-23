@@ -56,7 +56,7 @@ fun SearchScreen(
             .background(resources.white)
             .statusBarsPadding()
     ) {
-        // Шапка
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -79,7 +79,7 @@ fun SearchScreen(
             )
         }
 
-        // Поле ввода
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -133,6 +133,13 @@ fun SearchScreen(
                     playlistsViewModel.setSelectedTrack(track)
                     onTrackClick()
                 },
+                onHistoryClick = { query ->
+                    searchText = query
+                    viewModel.search(query)
+                },
+                onClearHistory = {
+                    viewModel.clearHistory()
+                },
                 onRetry = { viewModel.search(searchText) }
             )
         }
@@ -145,9 +152,11 @@ private fun SearchContent(
     searchText: String,
     resources: SearchScreenResources,
     onTrackClick: (Track) -> Unit,
+    onHistoryClick: (String) -> Unit,
+    onClearHistory: () -> Unit,
     onRetry: () -> Unit
 ) {
-    if (searchText.isEmpty()) {
+    if (searchText.isEmpty() && screenState is SearchState.Initial) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(text = resources.searchInitialMessage, color = resources.gray, textAlign = TextAlign.Center)
         }
@@ -155,6 +164,43 @@ private fun SearchContent(
     }
 
     when (screenState) {
+        is SearchState.History -> {
+            if (searchText.isEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(top = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Вы искали",
+                        fontSize = 19.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.Black
+                    )
+                    LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f).padding(top = 16.dp)) {
+                        items(screenState.queries) { query ->
+                            Text(
+                                text = query,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onHistoryClick(query) }
+                                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                                fontSize = 16.sp,
+                                color = Color.Gray
+                            )
+                        }
+                    }
+                    Button(
+                        onClick = onClearHistory,
+                        modifier = Modifier.padding(bottom = 24.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.Black)
+                    ) {
+                        Text(text = "Очистить историю", color = Color.Black)
+                    }
+                }
+            }
+        }
+
         is SearchState.Searching -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = Color.Blue)
@@ -163,7 +209,6 @@ private fun SearchContent(
         
         is SearchState.Success -> {
             if (screenState.list.isEmpty()) {
-                // Плейсхолдер "Ничего не найдено"
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Image(
@@ -198,7 +243,6 @@ private fun SearchContent(
         }
         
         is SearchState.Fail -> {
-            // Плейсхолдер "Проблемы со связью" строго по макету
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,

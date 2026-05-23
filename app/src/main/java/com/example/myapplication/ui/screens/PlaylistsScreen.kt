@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,7 +28,7 @@ fun PlaylistsScreen(
     playlistsViewModel: PlaylistsViewModel,
     onBackClick: () -> Unit,
     onAddNewPlaylistClick: () -> Unit,
-    onPlaylistClick: (Long) -> Unit // Новый параметр для навигации
+    onPlaylistClick: (Long) -> Unit
 ) {
     val playlists by playlistsViewModel.playlists.collectAsState(initial = emptyList())
 
@@ -47,13 +48,15 @@ fun PlaylistsScreen(
                 IconButton(onClick = onBackClick) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Назад"
+                        contentDescription = "Назад",
+                        tint = Color.Black
                     )
                 }
                 Text(
                     text = "Плейлисты",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
+                    color = Color.Black,
                     modifier = Modifier.padding(start = 16.dp)
                 )
             }
@@ -73,7 +76,7 @@ fun PlaylistsScreen(
                 ) {
                     items(playlists) { playlist ->
                         PlaylistListItem(playlist = playlist) {
-                            onPlaylistClick(playlist.id) // Передаем ID для перехода
+                            onPlaylistClick(playlist.id)
                         }
                         HorizontalDivider(thickness = 0.5.dp, color = Color.LightGray)
                     }
@@ -86,7 +89,7 @@ fun PlaylistsScreen(
                 .padding(32.dp)
                 .align(Alignment.BottomEnd),
             onClick = onAddNewPlaylistClick,
-            containerColor = Color.Gray,
+            containerColor = Color.Black,
             contentColor = Color.White,
             shape = CircleShape
         ) {
@@ -117,8 +120,13 @@ fun PlaylistListItem(playlist: Playlist, onClick: () -> Unit) {
                 fontWeight = FontWeight.Medium,
                 color = Color.Black
             )
+            val tracksString = pluralStringResource(
+                id = R.plurals.tracks_count, 
+                count = playlist.tracksCount, 
+                playlist.tracksCount
+            )
             Text(
-                text = "${playlist.tracks.size} треков",
+                text = tracksString,
                 fontSize = 12.sp,
                 color = Color.Gray
             )

@@ -2,7 +2,6 @@ package com.example.myapplication.ui.view_model
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.myapplication.data.network.DatabaseMock
 import com.example.myapplication.data.network.Playlist
 import com.example.myapplication.data.network.Track
 import com.example.myapplication.domain.PlaylistsRepository
@@ -16,14 +15,10 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 
 class PlaylistsViewModel : ViewModel() {
-    // Используем Creator для получения репозиториев. 
-    // Он сам подставит нужный NetworkClient и привяжет репозиторий к viewModelScope.
+
     private val playlistsRepository: PlaylistsRepository = Creator.getPlaylistsRepository(viewModelScope)
     private val tracksRepository: TracksRepository = Creator.getTracksRepository(viewModelScope)
     
-    // Прямой доступ к базе через мок для простых операций
-    private val databaseRepository = DatabaseMock(viewModelScope)
-
     private val _selectedTrack = MutableStateFlow<Track?>(null)
     val selectedTrack = _selectedTrack.asStateFlow()
 
@@ -37,7 +32,8 @@ class PlaylistsViewModel : ViewModel() {
         }
     }
     
-    val favoriteList: Flow<List<Track>> = databaseRepository.getFavoriteTracks()
+
+    val favoriteList: Flow<List<Track>> = tracksRepository.getFavoriteTracks()
 
     fun createNewPlayList(namePlaylist: String, description: String) {
         viewModelScope.launch(Dispatchers.IO) {

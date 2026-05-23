@@ -1,21 +1,24 @@
 package com.example.myapplication.data.network
 
+import com.example.myapplication.data.database.AppDatabase
+import com.example.myapplication.data.database.entity.PlaylistTrackCrossRef
 import com.example.myapplication.data.dto.TracksSearchRequest
 import com.example.myapplication.data.dto.TracksSearchResponse
 import com.example.myapplication.domain.NetworkClient
 import com.example.myapplication.domain.TracksRepository
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 class TracksRepositoryImpl(
     private val networkClient: NetworkClient,
-    private val scope: CoroutineScope
+    private val database: AppDatabase
 ) : TracksRepository {
     
-    private val database = DatabaseMock(scope)
+    private val tracksDao = database.tracksDao()
+    private val playlistsDao = database.playlistsDao()
 
     override suspend fun searchTracks(expression: String): List<Track> {
         val response = networkClient.doRequest(TracksSearchRequest(expression))
@@ -32,32 +35,35 @@ class TracksRepositoryImpl(
                 )
             }
         } else {
-            // КРИТИЧЕСКИ ВАЖНО: выбрасываем исключение, чтобы ViewModel увидела ошибку
-            throw IOException("Network connection failed with code: ${response.resultCode}")
+            throw IOException("Network connection failed")
         }
     }
 
     override fun getTrackByNameAndArtist(track: Track): Flow<Track?> {
-        return database.getTrackByNameAndArtist(track)
+        return tracksDao.getTrackByNameAndArtist(track.trackName, track.artistName)
+            .map { it?.toTrack() }
     }
 
     override suspend fun insertTrackToPlaylist(track: Track, playlistId: Long) {
-        database.insertTrack(track.copy(playlistId = playlistId))
+        tracksDao.insertTrack(track.toEntity())
+        playlistsDao.insertPlaylistTrackCrossRef(PlaylistTrackCrossRef(playlistId, track.id))
     }
 
     override suspend fun deleteTrackFromPlaylist(track: Track) {
-        database.insertTrack(track.copy(playlistId = 0))
+
     }
 
     override suspend fun updateTrackFavoriteStatus(track: Track, isFavorite: Boolean) {
-        database.insertTrack(track.copy(favorite = isFavorite))
+        tracksDao.insertTrack(track.copy(favorite = isFavorite).toEntity())
     }
 
     override fun deleteTracksByPlaylistId(playlistId: Long) {
-        database.deleteTracksByPlaylistId(playlistId)
+
     }
 
     override fun getFavoriteTracks(): Flow<List<Track>> {
-        return database.getFavoriteTracks()
+        return tracksDao.getFavoriteTracks().map { entities ->
+            entities.map { it.toTrack() }
+        }
     }
 }

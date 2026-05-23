@@ -47,7 +47,6 @@ fun TrackDetailsScreen(
     var isFavorite by remember { mutableStateOf(track.favorite) }
     var showBottomSheet by remember { mutableStateOf(false) }
     
-    // Позволяем панели раскрываться почти на весь экран
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
     
@@ -150,7 +149,7 @@ fun TrackDetailsScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.9f) // ТЕПЕРЬ ПАНЕЛЬ БОЛЬШАЯ (90% ЭКРАНА)
+                    .fillMaxHeight(0.9f)
                     .padding(bottom = 32.dp)
             ) {
                 Text(
@@ -198,8 +197,8 @@ fun PlaylistRowItem(playlist: Playlist, onClick: () -> Unit) {
             Text(text = playlist.name, fontSize = 16.sp, color = Color.Black)
             val tracksString = pluralStringResource(
                 id = R.plurals.tracks_count, 
-                count = playlist.tracks.size, 
-                playlist.tracks.size
+                count = playlist.tracksCount, 
+                playlist.tracksCount
             )
             Text(text = tracksString, fontSize = 11.sp, color = Color.Gray)
         }

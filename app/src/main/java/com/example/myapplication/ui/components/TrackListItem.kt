@@ -27,7 +27,7 @@ fun TrackListItem(track: Track) {
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Обложка трека с Coil
+
         AsyncImage(
             model = track.artworkUrl100,
             placeholder = painterResource(id = R.drawable.ic_music),

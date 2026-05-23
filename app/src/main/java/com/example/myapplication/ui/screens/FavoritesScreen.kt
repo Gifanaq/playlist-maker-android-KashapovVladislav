@@ -30,7 +30,7 @@ fun FavoritesScreen(
             .background(Color.White)
             .statusBarsPadding()
     ) {
-        // Заголовок
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()

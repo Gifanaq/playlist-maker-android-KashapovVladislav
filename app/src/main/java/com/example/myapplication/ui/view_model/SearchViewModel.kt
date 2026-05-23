@@ -2,7 +2,8 @@ package com.example.myapplication.ui.view_model
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.myapplication.data.network.Track
+
+import com.example.myapplication.domain.SearchHistoryRepository
 import com.example.myapplication.domain.TracksRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -14,6 +15,7 @@ import kotlinx.coroutines.launch
 class SearchViewModel : ViewModel() {
     
     private val tracksRepository: TracksRepository = Creator.getTracksRepository(viewModelScope)
+    private val historyRepository: SearchHistoryRepository = Creator.getSearchHistoryRepository()
     
     private val _searchScreenState = MutableStateFlow<SearchState>(SearchState.Initial)
     val searchScreenState = _searchScreenState.asStateFlow()
@@ -21,12 +23,26 @@ class SearchViewModel : ViewModel() {
     private var searchJob: Job? = null
     private var lastQuery: String? = null
 
-    // Сделали публичной, чтобы SearchScreen мог вызывать её
+    init {
+        loadHistory()
+    }
+
+    fun loadHistory() {
+        viewModelScope.launch {
+            val queries = historyRepository.getHistory()
+            if (queries.isNotEmpty()) {
+                _searchScreenState.value = SearchState.History(queries)
+            } else {
+                _searchScreenState.value = SearchState.Initial
+            }
+        }
+    }
+
     fun searchDebounce(changedText: String) {
         if (changedText == lastQuery) return
         
         if (changedText.isBlank()) {
-            clearSearch()
+            loadHistory()
             return
         }
 
@@ -38,14 +54,20 @@ class SearchViewModel : ViewModel() {
     }
 
     fun search(whatSearch: String) {
-        if (whatSearch.isBlank()) return
+        if (whatSearch.isBlank()) {
+            loadHistory()
+            return
+        }
         
         lastQuery = whatSearch
         searchJob?.cancel()
+        
         viewModelScope.launch {
             _searchScreenState.update { SearchState.Searching }
             
-            // Задержка 2 сек, чтобы лоадер был отчетливо виден согласно твоей просьбе
+
+            historyRepository.addTrackToHistory(whatSearch)
+            
             delay(2000L) 
             
             try {
@@ -60,6 +82,12 @@ class SearchViewModel : ViewModel() {
     fun clearSearch() {
         searchJob?.cancel()
         lastQuery = null
+        loadHistory()
+    }
+
+
+    fun clearHistory() {
+        historyRepository.clearHistory()
         _searchScreenState.value = SearchState.Initial
     }
 

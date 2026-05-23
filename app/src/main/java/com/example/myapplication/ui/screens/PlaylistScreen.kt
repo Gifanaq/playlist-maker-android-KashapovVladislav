@@ -30,7 +30,7 @@ fun PlaylistScreen(
 ) {
     val playlistState by playlistViewModel.playlist.collectAsState(initial = null)
     
-    // Получаем текущий год динамически
+
     val currentYear = remember { Calendar.getInstance().get(Calendar.YEAR).toString() }
 
     Scaffold(
@@ -84,7 +84,7 @@ fun PlaylistScreen(
                         color = Color.Black
                     )
                     Text(
-                        text = currentYear, // Теперь год динамический
+                        text = currentYear,
                         fontSize = 18.sp,
                         color = Color.Black,
                         modifier = Modifier.padding(top = 8.dp)
