@@ -1,5 +1,7 @@
 package com.example.myapplication.ui.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -19,12 +21,21 @@ import coil.compose.AsyncImage
 import com.example.myapplication.R
 import com.example.myapplication.data.network.Track
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TrackListItem(track: Track) {
+fun TrackListItem(
+    track: Track,
+    onLongClick: (() -> Unit)? = null,
+    onClick: () -> Unit = {}
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
+            .padding(vertical = 8.dp, horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
 

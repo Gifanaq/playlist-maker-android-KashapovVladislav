@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 
 class PlaylistsRepositoryImpl(
-    private val database: AppDatabase
+    database: AppDatabase // Убрали private val, так как используем только для инициализации dao
 ) : PlaylistsRepository {
 
     private val playlistsDao = database.playlistsDao()
@@ -27,17 +27,25 @@ class PlaylistsRepositoryImpl(
         }
     }
 
-    override suspend fun addNewPlaylist(name: String, description: String) {
+    override suspend fun addNewPlaylist(name: String, description: String, coverImageUri: String?) {
         playlistsDao.insertPlaylist(
             PlaylistEntity(
                 name = name,
                 description = description,
-                imagePath = null
+                coverImageUri = coverImageUri
             )
         )
     }
 
     override suspend fun deletePlaylistById(id: Long) {
         playlistsDao.deletePlaylist(id)
+    }
+
+    override suspend fun updatePlaylistCover(playlistId: Long, coverImageUri: String) {
+        playlistsDao.updatePlaylistCover(playlistId, coverImageUri)
+    }
+
+    override suspend fun deleteTrackFromPlaylist(playlistId: Long, trackId: Long) {
+        playlistsDao.deleteTrackFromPlaylist(playlistId, trackId)
     }
 }

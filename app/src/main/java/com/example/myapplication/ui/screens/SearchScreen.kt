@@ -79,7 +79,6 @@ fun SearchScreen(
             )
         }
 
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -123,7 +122,6 @@ fun SearchScreen(
             }
         }
 
-        // Контентная область
         Box(modifier = Modifier.fillMaxSize()) {
             SearchContent(
                 screenState = screenState,
@@ -229,14 +227,18 @@ private fun SearchContent(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    contentPadding = PaddingValues(vertical = 8.dp)
                 ) {
                     items(screenState.list) { track ->
-                        Box(modifier = Modifier.clickable { onTrackClick(track) }) {
-                            TrackListItem(track = track)
-                        }
-                        HorizontalDivider(thickness = 0.5.dp, color = resources.divider)
+                        TrackListItem(
+                            track = track,
+                            onClick = { onTrackClick(track) }
+                        )
+                        HorizontalDivider(
+                            modifier = Modifier.padding(start = 73.dp),
+                            thickness = 0.5.dp, 
+                            color = resources.divider
+                        )
                     }
                 }
             }

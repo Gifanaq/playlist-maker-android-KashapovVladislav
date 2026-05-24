@@ -47,7 +47,8 @@ fun PlaylistHost(navController: NavHostController) {
         composable(Screens.Favorites.name) {
             FavoritesScreen(
                 playlistsViewModel = playlistsViewModel,
-                onBackClick = { navigateBack() }
+                onBackClick = { navigateBack() },
+                onTrackClick = { navController.navigate(Screens.TrackDetails.name) }
             )
         }
 

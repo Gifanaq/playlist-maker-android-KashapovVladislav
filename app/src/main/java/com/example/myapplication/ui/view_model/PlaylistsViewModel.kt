@@ -9,6 +9,7 @@ import com.example.myapplication.domain.TracksRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
@@ -22,6 +23,17 @@ class PlaylistsViewModel : ViewModel() {
     private val _selectedTrack = MutableStateFlow<Track?>(null)
     val selectedTrack = _selectedTrack.asStateFlow()
 
+    private val _coverImageUri = MutableStateFlow<String?>(null)
+    val coverImageUri: StateFlow<String?> = _coverImageUri.asStateFlow()
+
+    fun setCoverImageUri(uri: String?) {
+        _coverImageUri.value = uri
+    }
+
+    fun clearCoverImageUri() {
+        _coverImageUri.value = null
+    }
+
     fun setSelectedTrack(track: Track) {
         _selectedTrack.value = track
     }
@@ -31,13 +43,17 @@ class PlaylistsViewModel : ViewModel() {
             emit(list)
         }
     }
-    
 
     val favoriteList: Flow<List<Track>> = tracksRepository.getFavoriteTracks()
 
     fun createNewPlayList(namePlaylist: String, description: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            playlistsRepository.addNewPlaylist(namePlaylist, description)
+            playlistsRepository.addNewPlaylist(
+                name = namePlaylist,
+                description = description,
+                coverImageUri = _coverImageUri.value
+            )
+            _coverImageUri.value = null
         }
     }
 
@@ -49,14 +65,9 @@ class PlaylistsViewModel : ViewModel() {
         tracksRepository.updateTrackFavoriteStatus(track, isFavorite)
     }
 
-    suspend fun deleteTrackFromPlaylist(track: Track) {
-        tracksRepository.deleteTrackFromPlaylist(track)
-    }
 
-    suspend fun deletePlaylistById(id: Long) {
-        tracksRepository.deleteTracksByPlaylistId(id)
-        playlistsRepository.deletePlaylistById(id)
-    }
+
+
 
     suspend fun isExist(track: Track): Track? {
         return tracksRepository.getTrackByNameAndArtist(track = track).firstOrNull()

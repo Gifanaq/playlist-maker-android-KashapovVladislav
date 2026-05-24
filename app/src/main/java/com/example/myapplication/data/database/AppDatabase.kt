@@ -14,7 +14,7 @@ import com.example.myapplication.data.database.entity.TrackEntity
         PlaylistEntity::class,
         PlaylistTrackCrossRef::class
     ],
-    version = 1,
+    version = 2, // УВЕЛИЧИЛИ ВЕРСИЮ для сброса данных и поддержки новых полей (coverImageUri)
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
