@@ -24,9 +24,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import coil.compose.AsyncImage
 import com.example.myapplication.R
 import com.example.myapplication.data.network.Playlist
+import com.example.myapplication.data.network.Track
 import com.example.myapplication.ui.view_model.PlaylistsViewModel
 import kotlinx.coroutines.launch
 
@@ -188,10 +190,12 @@ fun PlaylistRowItem(playlist: Playlist, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
-            model = null,
+            model = playlist.coverImageUri?.toUri(),
             placeholder = painterResource(id = R.drawable.ic_music),
+            error = painterResource(id = R.drawable.ic_music),
             contentDescription = null,
-            modifier = Modifier.size(45.dp).clip(RoundedCornerShape(2.dp)).background(Color.LightGray)
+            modifier = Modifier.size(45.dp).clip(RoundedCornerShape(2.dp)).background(Color.LightGray),
+            contentScale = ContentScale.Crop
         )
         Column(modifier = Modifier.padding(start = 12.dp)) {
             Text(text = playlist.name, fontSize = 16.sp, color = Color.Black)

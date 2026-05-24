@@ -53,7 +53,7 @@ class SearchHistoryPreferences(
         }
     }
 
-    // НОВЫЙ МЕТОД: Очистка истории в DataStore
+
     fun clear() {
         coroutineScope.launch {
             dataStore.edit { preferences ->
