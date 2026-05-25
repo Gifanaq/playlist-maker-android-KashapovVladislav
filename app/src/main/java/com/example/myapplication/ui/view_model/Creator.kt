@@ -23,6 +23,7 @@ object Creator {
     private const val BASE_URL = "https://itunes.apple.com"
     private var database: AppDatabase? = null
     private var searchHistoryPreferences: SearchHistoryPreferences? = null
+    private var applicationContext: Context? = null
 
     private val retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)
@@ -32,6 +33,7 @@ object Creator {
     private val iTunesService = retrofit.create(ITunesApiService::class.java)
     
     fun init(context: Context) {
+        applicationContext = context.applicationContext
         if (database == null) {
             database = Room.databaseBuilder(
                 context.applicationContext,
@@ -53,7 +55,7 @@ object Creator {
     }
 
     fun getPlaylistsRepository(scope: CoroutineScope): PlaylistsRepository {
-        return PlaylistsRepositoryImpl(database!!)
+        return PlaylistsRepositoryImpl(database!!, applicationContext!!)
     }
 
     fun getSearchHistoryRepository(): SearchHistoryRepository {
